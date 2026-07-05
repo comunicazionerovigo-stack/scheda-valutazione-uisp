@@ -629,16 +629,23 @@
           coordinatore: ev.coordinatore, totale: ev.totale, tier: ev.tier
         })
       });
-      if(!res.ok) throw new Error('function not available');
+      if(!res.ok){
+        let errText = '';
+        try{ errText = await res.text(); }catch(e2){ errText = '(nessun dettaglio)'; }
+        throw new Error(`HTTP ${res.status}: ${errText}`);
+      }
       showToast(`PDF inviato a Umberto ✓ ${ev.coordinatoreEmail ? '(copia inviata anche a te)' : ''}`);
     }catch(e){
-      // fallback: nessuna funzione Netlify configurata ancora -> scarica il PDF
-      // e apre il client email con destinatario e oggetto pronti
+      // fallback: la funzione Netlify ha risposto con un errore, o non è raggiungibile
+      // -> mostriamo l'errore preciso, scarichiamo il PDF e apriamo il client email
+      console.error('Errore invio PDF:', e);
+      alert('ERRORE INVIO EMAIL (mostra questo messaggio a chi ti assiste):\n\n' + e.message);
       doc.save(filename);
       const subject = encodeURIComponent(`Valutazione ${ev.animatore} - ${ev.plesso} - ${ev.settimaneLabel}`);
       const body = encodeURIComponent(`Ciao,\n\nin allegato la valutazione di ${ev.animatore} (${ev.plesso}, ${ev.settimaneLabel}).\nPunteggio: ${ev.totale}/100 - ${ev.tier}\n\nIl PDF è stato scaricato automaticamente: allegalo a questa email prima di inviarla.\n\nCoordinatore: ${ev.coordinatore}`);
-      window.location.href = `mailto:${EMAIL_TO}?subject=${subject}&body=${body}`;
-      showToast('PDF scaricato: allegalo alla mail che si è aperta e invia a Umberto.');
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_TO)}&su=${subject}&body=${body}`;
+      window.open(gmailUrl, '_blank');
+      showToast('PDF scaricato: allegalo alla mail Gmail che si è aperta e invia a Umberto.');
     }
   }
 
