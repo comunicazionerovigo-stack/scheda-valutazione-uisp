@@ -25,7 +25,7 @@ exports.handler = async function (event) {
 
   try {
     const data = JSON.parse(event.body);
-    const { to, cc, filename, pdfBase64, animatore, plesso, settimane, coordinatore, totale, tier } = data;
+    const { to, filename, pdfBase64, animatore, plesso, settimane, coordinatore, totale, tier } = data;
 
     if (!to || !pdfBase64 || !filename) {
       return { statusCode: 400, body: 'Dati mancanti' };
@@ -60,7 +60,6 @@ exports.handler = async function (event) {
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: [to],
-        cc: cc ? [cc] : undefined,
         subject,
         html,
         attachments: [
