@@ -369,10 +369,6 @@
           <label>Coordinatore/coordinatrice</label>
           <input id="f-coordinatore" type="text" placeholder="Il tuo nome">
         </div>
-        <div class="field">
-          <label>La tua email (per ricevere copia)</label>
-          <input id="f-email" type="email" placeholder="nome@esempio.it">
-        </div>
         <div class="field full">
           <label>Settimane di riferimento</label>
           <div class="week-picker" id="week-picker">
@@ -458,7 +454,6 @@
     const plessoAltro = plesso === 'Altro' ? prompt('Nome del plesso:') : null;
     const animatore = document.getElementById('f-animatore').value.trim();
     const coordinatore = document.getElementById('f-coordinatore').value.trim();
-    const coordinatoreEmail = document.getElementById('f-email').value.trim();
     const episodi = document.getElementById('f-episodi').value.trim();
     const feedback = document.getElementById('f-feedback').value.trim();
     const hint = document.getElementById('hint');
@@ -481,7 +476,7 @@
     const weekObjs = WEEKS.filter(w=>selectedWeeks.has(w.id)).sort((a,b)=>a.start.localeCompare(b.start));
     const evaluation = {
       plesso: plesso==='Altro' ? plessoAltro : plesso,
-      animatore, anno: 2026, coordinatore, coordinatoreEmail, episodi, feedback,
+      animatore, anno: 2026, coordinatore, episodi, feedback,
       settimane: weekObjs.map(w=>w.id),
       settimaneLabel: weekObjs.map(w=>w.label).join(', '),
       settimanaInizio: weekObjs[0].start,
@@ -624,7 +619,7 @@
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
-          to: EMAIL_TO, cc: ev.coordinatoreEmail || undefined, filename, pdfBase64,
+          to: EMAIL_TO, filename, pdfBase64,
           animatore: ev.animatore, plesso: ev.plesso, settimane: ev.settimaneLabel,
           coordinatore: ev.coordinatore, totale: ev.totale, tier: ev.tier
         })
@@ -634,7 +629,7 @@
         try{ errText = await res.text(); }catch(e2){ errText = '(nessun dettaglio)'; }
         throw new Error(`HTTP ${res.status}: ${errText}`);
       }
-      showToast(`PDF inviato a Umberto ✓ ${ev.coordinatoreEmail ? '(copia inviata anche a te)' : ''}`);
+      showToast('PDF inviato a Umberto ✓');
     }catch(e){
       // fallback: la funzione Netlify ha risposto con un errore, o non è raggiungibile
       // -> mostriamo l'errore preciso, scarichiamo il PDF e apriamo il client email
